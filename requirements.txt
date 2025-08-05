@@ -1,0 +1,6 @@
+streamlit>=1.26
+pandas
+folium
+python-dotenv
+requests
+tqdm           
