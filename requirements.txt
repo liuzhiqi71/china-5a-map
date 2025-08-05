@@ -1,6 +1,7 @@
 streamlit>=1.26
 pandas
 folium
+streamlit-folium
 python-dotenv
 requests
-tqdm           
+tqdm

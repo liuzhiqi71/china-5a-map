@@ -22,11 +22,13 @@ import streamlit as st
 import pandas as pd
 import folium
 from folium.plugins import MarkerCluster, BeautifyIcon
-from streamlit.components.v1 import html
+from streamlit_folium import st_folium
 
 import os
 import requests
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv())  # load variables from .env if present
 # ────────────── 路径配置 ──────────────
 BASE_DIR = Path(__file__).resolve().parent
 DATA_CSV = BASE_DIR / "5A_scenic_geo_places.csv"
@@ -41,7 +43,7 @@ st.set_page_config(page_title="全国5A级景点", layout="wide")
 
 st.markdown(
     """
-    <h1 style='margin-bottom:0.2em'>全国5A级景点｜为了下一次更好的出发！⛰️🏔️🗻</h1>
+    <h1 style='margin-bottom:0.2em'>5A级景点｜为了下一次更好地出发！⛰️🏔️🗻</h1>
     <p style='color:gray;margin:0'>by&nbsp;Will</p>
     """,
     unsafe_allow_html=True,
@@ -83,11 +85,11 @@ df_view = df[mask_prov & mask_city]
 st.info(f"共 **{len(df_view)}** 个景点", icon="🚗")
 
 # ────────────── 生成动态 Folium ──────────────
-def build_map(df_subset: pd.DataFrame) -> str:
+def build_map(df_subset: pd.DataFrame) -> folium.Map:
     # 空集则定位中国中心
     if df_subset.empty:
         m = folium.Map(location=[35.0, 103.8], zoom_start=4, tiles="CartoDB positron")
-        return m._repr_html_()
+        return m
 
     m = folium.Map(
         location=[df_subset["latitude"].mean(), df_subset["longitude"].mean()],
@@ -115,7 +117,7 @@ def build_map(df_subset: pd.DataFrame) -> str:
             ),
         ).add_to(cluster)
 
-    return m._repr_html_()
+    return m
 
 
 # ────────────── DeepSeek Chat Helper ──────────────
@@ -155,8 +157,8 @@ def ask_deepseek(prompt: str) -> str:
         return f"❌ 调用 DeepSeek 失败: {exc}"
 
 
-map_html = build_map(df_view)
-html(map_html, height=680, width=1200, scrolling=True)
+fmap = build_map(df_view)
+st_folium(fmap, use_container_width=True, height=680)
 
 # ────────────── 景区问答对话框 ──────────────
 st.divider()
